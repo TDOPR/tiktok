@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoliang.mapper.SysUserMapper">
+
+    <select id="findAllByUsernameByRoleId" resultType="java.lang.String">
+        select
+            username
+        from
+            sys_user
+        where
+            roleId = #{roleId}
+    </select>
+
+    <select id="selectPageVo" parameterType="com.haoliang.model.condition.SysUserCondition"
+            resultType="com.haoliang.model.vo.UserVO">
+        select
+            s.id,s.username,s.name,s.createTime,s.name,s.enabled,s.deleted,s.roleId,s.channelId,
+            s.email,s.mobile,s.googleSecret,sr.roleName,sc.channelName
+        from
+            sys_user s
+        left join
+            sys_role sr
+            on sr.id=s.roleId
+        left join
+            sys_channel sc
+            on sc.id=s.channelId
+        where
+            sr.roleCode!='admin'
+            and s.deleted=0
+        <if test="user.enabled!=null">
+            and s.enabled=#{user.enabled}
+        </if>
+        <if test="user.username!=null and user.username!=''">
+            and s.username like CONCAT('%',#{user.username},'%')
+        </if>
+        <if test="user.beginDate!=null">
+            and s.createTime <![CDATA[ >= ]]> #{user.beginDate}
+        </if>
+        <if test="user.endDate!=null">
+            and s.createTime <![CDATA[ <= ]]> #{user.endDate}
+        </if>
+    </select>
+
+    <select id="findExistsByRoleId" resultType="java.lang.Integer">
+        select
+            distinct roleId
+        from
+            sys_user
+        where
+            deleted=0
+            and roleId in
+            <foreach collection="idList" item="id" separator="," open="(" close=")">
+                #{id}
+            </foreach>
+    </select>
+
+</mapper>

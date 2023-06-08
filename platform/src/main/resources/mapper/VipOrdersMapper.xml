@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoliang.mapper.VipOrdersMapper">
+
+    <update id="clearFrozenAmount">
+        update
+            vip_orders v,app_users u
+        set
+            allowance=allowance+frozenAmount,
+            frozenAmount=0
+        where
+            v.userId=u.id
+            and  greenhorn=0
+            and frozenAmount>0
+            and v.valid=1
+    </update>
+
+    <select id="getMaxLevel" resultType="com.haoliang.model.VipOrders">
+        select
+            *
+        from
+            vip_orders
+        where
+            userId = #{userId}
+            and allowance > 0
+        order by
+            level desc,
+            createTime
+    </select>
+
+    <select id="sumAllowanceByUserId" resultType="java.math.BigDecimal">
+        select
+            sum(allowance)
+        from
+            vip_orders
+        where
+            userId = #{userId}
+            and level > 0
+    </select>
+
+    <select id="sumAllowanceByUserIdAndZeroLevel" resultType="java.math.BigDecimal">
+        select
+            sum(allowance)
+        from
+            vip_orders
+        where
+            userId = #{userId}
+            and level = 0
+            and valid = 1
+    </select>
+
+    <select id="sumAllowanceByZeroLevel" resultType="java.math.BigDecimal">
+        select
+            sum(total-allowance - frozenAmount)
+        from
+            vip_orders
+        where
+            level = 0
+    </select>
+
+    <select id="sumAllowanceByZeroLevelByParentId" resultType="java.math.BigDecimal">
+        select
+            sum(total-allowance - frozenAmount)
+        from
+            vip_orders v
+        left join
+            tree_paths t
+            on v.userId = t.descendant
+        where
+            t.ancestor = #{userId}
+            and t.level > 0
+            and v.level = 0
+    </select>
+
+</mapper>

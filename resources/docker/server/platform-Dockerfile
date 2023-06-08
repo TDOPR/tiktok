@@ -1,0 +1,27 @@
+#添加Java启动的必要镜像
+FROM  openjdk:8
+
+#设置容器作者
+MAINTAINER dominick-li
+
+#构建工作目录
+RUN mkdir -p /docker/server
+RUN mkdir -p /docker/server/data
+RUN mkdir -p /docker/server/logs
+RUN mkdir -p /docker/server/conf
+
+WORKDIR /docker/server
+
+#添加文件到容器中
+ADD  lib/easyTrade-platform-1.0.0.jar  ./easyTrade-platform-1.0.0.jar
+ADD  conf    /docker/server/conf
+
+#设置环境变量暴露服务端口
+ENV SERVER_PORT=9090
+#声明需要暴露的端口
+EXPOSE  ${SERVER_PORT}
+#设置环境变量暴露JVM参数
+ENV JAVA_OPTS=""
+
+CMD java ${JAVA_OPTS} -Djava.security.egd=file:/dev/./urandom -jar easyTrade-platform-1.0.0.jar -Dserver.port=${SERVER_PORT} --spring.config.location=conf/platform-application.yml
+

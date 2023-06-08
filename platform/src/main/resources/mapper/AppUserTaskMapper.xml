@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoliang.mapper.AppUserTaskMapper">
+
+    <delete id="removeTaskNeStatus">
+        delete from
+            app_user_task
+            where
+                status!=#{status}
+                and userId in(select id from app_users where greenhorn=0)
+    </delete>
+
+    <select id="page" resultType="com.haoliang.model.vo.AppUserTaskVO">
+        select
+            aut.id,DATE_FORMAT(aut.createTime, '%Y-%m-%d') createTime,aut.imgUrl,
+            aut.amount dAmount,t.built, t.username,t.opusId,t.type,t.tiktokUserId
+        from
+            app_user_task aut
+        left join
+            tiktok_task t
+            on t.id = aut.taskId
+        where
+            aut.userId = #{userId}
+            and aut.status = #{status}
+        order by
+            t.createTime desc
+    </select>
+
+    <select id="checkTaskPage" resultType="com.haoliang.model.vo.CheckTaskVO">
+        select
+            a.id,u.email,u.id userId,t.username,t.opusId,imgUrl,
+            a.lastmodifiedTime createTime,amount,t.type,a.status, a.auditTime
+        from
+            app_user_task a
+        left join
+            app_users u
+            on a.userId = u.id
+        left join
+            tiktok_task t
+            on a.taskId = t.id
+        where 1=1
+        <if test="param.userId!=null">
+            and u.id= #{param.userId}
+        </if>
+        <if test="param.type!=null">
+            and t.type= #{param.type}
+        </if>
+        <if test="param.status!=null">
+            and a.status= #{param.status}
+        </if>
+        <if test="param.status==null">
+            and a.status>1
+        </if>
+        <if test="param.email!=null and param.email!=''">
+            and u.email like CONCAT('%',#{param.email},'%')
+        </if>
+        <if test="param.username!=null and param.username!=''">
+            and t.username like CONCAT('%',#{param.username},'%')
+        </if>
+        <if test="param.beginDate!=null">
+            and a.createTime <![CDATA[ >= ]]> #{param.beginDate}
+        </if>
+        <if test="param.endDate!=null">
+            and a.createTime <![CDATA[ <= ]]> #{param.endDate}
+        </if>
+        order by
+            a.status,
+            a.createTime desc
+    </select>
+
+    <select id="selectCountByUserIdAndMaxLevel" resultType="java.lang.Integer">
+        select
+            count(*)
+        from
+            app_user_task
+        where
+            userId = #{userId}
+            and level >= #{level}
+            and createTime between DATE_FORMAT(CURDATE(), '%Y-%m-%d 00:00:00')
+            and DATE_FORMAT(CURDATE(), '%Y-%m-%d 23:59:59')
+    </select>
+
+    <select id="getAutoCheckList" resultType="com.haoliang.model.dto.AppUserTaskDTO">
+        select
+            aut.id, vipOrderIds, aut.userId, amount, tt.type
+        from
+            app_user_task aut
+        left join
+            tiktok_task tt
+            on aut.taskId = tt.id
+        where
+            aut.status = #{status}
+            and aut.createTime <![CDATA[ <= ]]> #{localDateTime}
+    </select>
+
+    <select id="getById" resultType="com.haoliang.model.dto.AppUserTaskDTO">
+        select
+            aut.id, vipOrderIds, aut.userId, amount, tt.type
+        from
+            app_user_task aut
+        left join
+            tiktok_task tt
+            on aut.taskId = tt.id
+        where
+            aut.id = #{id}
+    </select>
+
+    <select id="getTiktokTaskDTO" resultType="com.haoliang.model.dto.TiktokTaskDTO">
+        select
+            imgUrl, built, aut.userId, status
+        from
+            app_user_task aut
+        left join
+            tiktok_task tt
+            on aut.taskId = tt.id
+        where
+            aut.id = #{id}
+    </select>
+
+    <select id="selectTiktokCountNeStatus" resultType="com.haoliang.model.dto.TiktokCountDTO">
+        select
+            taskId,count(a.id) count
+        from
+            app_user_task a
+        left join
+            app_users u
+            on a.userId=u.id
+        where
+            greenhorn=0
+            and status!=#{status}
+        group by
+            taskId
+    </select>
+
+</mapper>

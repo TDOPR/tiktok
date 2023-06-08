@@ -1,0 +1,14 @@
+{
+  "outPath": "src\\main\\resources\\static",
+  "requestHeaders": [{
+    "name": "token",
+    "type": "string",
+    "desc": "身份凭证",
+    "value":"",
+    "required": false,
+    "since": "-"
+  }],
+  "serverUrl": "http://127.0.0.1:4612",
+  "projectName": "后台管理系统",
+  "packageFilters": "com.haoliang.controller.smartdoc"
+}

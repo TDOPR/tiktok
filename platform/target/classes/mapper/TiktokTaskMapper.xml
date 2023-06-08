@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoliang.mapper.TiktokTaskMapper">
+
+    <update id="reduceNum">
+        update
+            tiktok_task
+        set
+            hasNum=hasNum - 1
+        where
+            id = #{taskId}
+    </update>
+
+    <update id="increaseNum">
+        update
+            tiktok_task
+        set
+            hasNum=hasNum + 1
+        where
+            id in
+            <foreach collection="idList" item="id" separator="," open="(" close=")">
+                #{id}
+            </foreach>
+    </update>
+
+    <select id="page" resultType="com.haoliang.model.vo.TiktokTaskVO">
+        select
+            t.id, t.username, t.opusId, t.hasNum, t.type,t.built,aut.amount bamount,t.tiktokUserId, aut.status
+        from
+            tiktok_task t
+        left join
+            (select status,amount,taskId from app_user_task where userId=#{userId}) aut
+            on t.id=aut.taskId
+        where
+            1=1
+        <if test="greenhorn==1">
+            and t.built>0
+        </if>
+        <if test="greenhorn==0">
+            and t.hasNum>0
+        </if>
+        order by
+            aut.status,
+            t.built desc,
+            t.createTime desc
+    </select>
+
+    <select id="pageByUserId" resultType="com.haoliang.model.vo.MyTiktokTaskVO">
+        select
+            num, hasNum, type, createTime
+        from
+            tiktok_task
+        where
+            userId = #{userId}
+        order by
+            createTime desc
+    </select>
+
+</mapper>

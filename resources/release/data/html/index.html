@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<img id="main" style="width:100%" >
+</body>
+<script>
+    function getQueryString(name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+            return unescape(r[2]);
+        }
+        return null;
+    }
+    var imgName = getQueryString("imgName");
+    var language = getQueryString("language");
+    var type=".jpg";
+    if(language ==="zh_CN"){
+          type=".png";
+     }
+    document.getElementById("main").src=language+"/"+imgName+type;
+</script>
+</html>

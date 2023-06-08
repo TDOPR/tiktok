@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoliang.mapper.TrxAddressPoolMapper">
+
+    <select id="randomGetAddress" resultType="com.haoliang.model.usd.TrxAddressPool">
+        select
+            id,coin_id coinId,address,keystore,pwd
+        from
+            trx_token_address_pool
+        where
+            coin_type=#{networdName}
+        order by  RAND() LIMIT 1
+    </select>
+
+    <delete id="deleteByAddress">
+        delete from
+            trx_token_address_pool
+        where
+            address = #{address}
+    </delete>
+
+</mapper>

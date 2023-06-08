@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoliang.mapper.UpdateUserLevelTaskMapper">
+
+    <select id="findUserTreeByUserId" resultType="com.haoliang.model.dto.AppUserTreeDTO">
+        select
+            @r as cid,
+            (select @r := inviteId from app_users where id = cid) as pId from
+            (select @r := #{userId} ) vars,
+            app_users
+        where
+            @r > 0
+    </select>
+
+</mapper>

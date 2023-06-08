@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoliang.mapper.TreePathMapper">
+
+    <resultMap type="com.haoliang.model.dto.TreeUserIdDTO" id="treePathTree">
+        <result column="email" property="email"/>
+        <result column="descendant" property="descendant"/>
+        <result column="level" property="level"/>
+        <result column="walletAmount" property="walletAmount"/>
+        <collection property="childList" ofType="com.haoliang.model.dto.TreeUserIdDTO" column="descendant"
+                    select="findTreeById"/>
+    </resultMap>
+
+    <select id="findTreeById" resultMap="treePathTree">
+        select
+            u.email, u.level, t.ancestor, t.descendant,w.walletAmount
+        from
+            tree_paths t
+        left join
+            wallets w
+            on t.descendant = w.userId
+        left join
+            app_users u
+            on u.id = w.userId
+        where
+            t.ancestor = #{id}
+            and t.level = 1
+    </select>
+
+    <select id="teamSum" resultType="java.lang.Integer">
+        select
+            COUNT(1)
+        from
+            tree_paths
+        where
+            ancestor = #{id}
+            and level > 0
+    </select>
+
+    <select id="teamSumValid" resultType="java.lang.Integer">
+        select
+            COUNT(1)
+        from
+            tree_paths t
+        left join
+            app_users u
+            on u.id = t.descendant
+        where
+            t.ancestor = #{id}
+            and t.level =1
+            and u.valid=1
+    </select>
+
+    <select id="teamMeshUser" resultType="java.lang.Integer">
+        select
+            COUNT(1)
+        from
+            tree_paths t
+        left join
+            app_users u
+            on u.id = t.descendant
+        where
+            t.ancestor = #{id}
+            and t.level>0
+            and u.valid=1
+    </select>
+
+    <select id="teamStarSum" resultType="java.lang.Integer">
+        select
+            COUNT(1)
+        from
+            tree_paths t
+        left join
+            app_users u
+            on u.id = t.descendant
+        where
+            t.ancestor = #{id}
+            and t.level > 0
+            and u.valid=1
+            and u.level>0
+    </select>
+
+    <select id="getChildren" resultMap="treePathTree">
+        select
+            t.ancestor,t.descendant,t.level
+        from
+            tree_paths t
+        where
+            t.ancestor = #{id}
+            and t.level = 1
+
+    </select>
+
+    <insert id="insertTreePath">
+        insert into
+            tree_paths (ancestor, descendant, LEVEL)
+        select
+            t.ancestor,#{uid},LEVEL + 1
+        from
+            tree_paths AS t
+        where
+            t.descendant = #{pid}
+    </insert>
+
+    <select id="getTaskEarningsByUserIdAndLevelList" resultType="com.haoliang.model.dto.TreePathAmountDTO">
+        select
+            sum(p.amount) totalAmount,t.level
+        from
+            tree_paths t
+        left join
+            wallet_ttt_logs p
+            on t.descendant=p.userId
+        left join
+            app_users u
+            on u.id=t.descendant
+        where
+            t.ancestor=#{uid}
+            and u.valid=1
+            and p.zero=0
+            and p.createTime BETWEEN DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '%Y-%m-%d 00:00:00')
+            and DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '%Y-%m-%d 23:59:59')
+            and t.level in
+            <foreach collection="levelList" item="level" separator="," open="(" close=")">
+                #{level}
+            </foreach>
+            and p.type in
+            <foreach collection="typeList" item="type" separator="," open="(" close=")">
+                #{type}
+            </foreach>
+        group by
+            level
+        having
+            totalAmount>0
+    </select>
+
+    <select id="getMyItemAmountByUserId" resultType="java.math.BigDecimal">
+        select
+            sum(w.principalAmount + w.robotAmount) totalAmount
+        from
+            tree_paths t
+        left join
+            wallets w
+            on t.descendant = w.userId
+        where
+            t.ancestor = #{uid}
+            and t.level > 0
+    </select>
+
+    <select id="getAllAncestorIdByUserId" resultType="java.lang.Integer">
+        select
+            ancestor
+        from
+            tree_paths t
+        left join
+            app_users u
+            on u.id = t.ancestor
+        where
+            descendant = #{uid}
+            and t.level > 0
+            and u.valid = 1
+    </select>
+
+    <select id="getTreePathLevelOrderByLevel" resultType="com.haoliang.model.dto.TreePathLevelDTO">
+        select
+            t.ancestor userId,u.level userLevel,u.vipLevel vipLevel
+        from
+            tree_paths t
+        left join
+             app_users u
+             on u.id = t.ancestor
+        where
+            t.descendant = #{uid}
+            and u.valid = 1
+            and u.level > 0
+            and t.level > 0
+        order by
+            t.level
+    </select>
+
+    <select id="getGenerationUserNum" resultType="java.lang.Integer">
+        select
+            count(descendant)
+        from
+            tree_paths t
+        left join
+            app_users u
+            ON u.id = descendant
+        where
+            ancestor = #{userId}
+            AND t.level = 1
+            AND u.valid = 1
+    </select>
+
+    <select id="getItemUserNum" resultType="java.lang.Integer">
+        select
+            count(descendant)
+        from
+            tree_paths t
+        left join
+            app_users u
+            on u.id = descendant
+        where
+            ancestor = #{userId}
+            and t.level > 0
+            and u.valid = 1
+    </select>
+
+</mapper>

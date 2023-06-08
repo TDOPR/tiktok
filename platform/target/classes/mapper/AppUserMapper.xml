@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoliang.mapper.AppUserMapper">
+
+    <insert id="insertBatchNoticeByUserId">
+        insert into
+            news_user(newsId, userId)
+        select
+            id, #{userId}
+        from
+            news
+        where
+            type = 2
+    </insert>
+
+    <select id="findInviteIdByUserId" resultType="java.lang.Integer">
+        select
+            inviteId
+        from
+            app_users
+        where
+            id = #{userId}
+    </select>
+
+    <select id="page" resultType="com.haoliang.model.vo.AppUsersVO"
+            parameterType="com.haoliang.model.condition.AppUsersCondition">
+        select
+            u.id,u.email,u.nickName,u.enabled,u.vipLevel,u.mobile,u.headImage,u.inviteCode, u.level,u.createTime,u.inviteId parentId,u.proxyRole,u.valid,
+            tmp.recharge,tmp2.withdraw,tmp3.consume,w.walletAmount ttt,w.usdWalletAmount usd
+        from
+            app_users u
+        left join
+            wallets w
+            on w.userId=u.id
+        left join
+            (select userId, sum(amount) recharge from wallet_usd_logs where type=1 GROUP BY userId ) tmp
+            on tmp.userId=u.id
+        left join
+            (select userId, sum(amount) withdraw from wallet_usd_logs where type=2 and status=0 group by userId ) tmp2
+            ON tmp2.userId=u.id
+        left join
+            (select userId, sum(amount) consume from wallet_usd_logs where type in(3,4) GROUP BY userId ) tmp3
+            on tmp3.userId=u.id
+        <if test="param.proxy">
+        left join
+            tree_paths t
+            on u.id = t.descendant
+        </if>
+        where
+            1=1
+        <if test="param.proxyUserId!=null">
+            and t.ancestor=#{param.proxyUserId}
+            and t.level>0
+        </if>
+        <if test="param.email!=null and param.email!=''">
+            and u.email like CONCAT('%',#{param.email},'%')
+        </if>
+        <if test="param.id!=null">
+            and u.id=#{param.id}
+        </if>
+        <if test="param.valid!=null">
+            and u.valid= #{param.valid}
+        </if>
+        <if test="param.level!=null">
+            and u.level= #{param.level}
+        </if>
+        <if test="param.vipLevel!=null">
+            and u.vipLevel= #{param.vipLevel}
+        </if>
+        <if test="param.proxyRole!=null">
+            and u.proxyRole= #{param.proxyRole}
+        </if>
+        <if test="param.beginDate!=null">
+            and u.createTime <![CDATA[ >= ]]> #{param.beginDate}
+        </if>
+        <if test="param.endDate!=null">
+            and u.createTime <![CDATA[ <= ]]> #{param.endDate}
+        </if>
+        order by
+            u.createTime desc
+    </select>
+
+    <select id="getValidUserCountByInviteId" resultType="java.lang.Integer">
+        select
+            count(1)
+        from
+            app_users
+        where
+            inviteId = #{userId}
+            and valid = 1
+    </select>
+
+    <select id="selectUserCountGroupByLevel" resultType="com.haoliang.model.dto.AppUserCountDTO">
+        select
+            level, count(1) count
+        from
+            app_users
+        where
+            level >0
+        group by
+            level
+    </select>
+
+    <select id="selectUserCountGroupByLevelParentId" resultType="com.haoliang.model.dto.AppUserCountDTO">
+        select
+            u.level, count(u.id) count
+        from
+            app_users u
+        left join
+            tree_paths t
+            ON u.id = t.descendant
+        where
+            t.ancestor=#{userId}
+            and u.level >0
+            and t.level>0
+        group by
+            u.level
+    </select>
+
+    <select id="getParentEmail" resultType="java.lang.String">
+        select
+            email
+        from
+            app_users
+        where
+            id = (select inviteId from app_users where id = #{userId})
+    </select>
+
+    <select id="getChildList" resultType="java.lang.String">
+        select
+            email
+        from
+            app_users
+        where
+            inviteId = #{userId}
+    </select>
+
+</mapper>

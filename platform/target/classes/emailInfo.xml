@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- 内存不足邮件提示 -->
+    <bean id="monitorDisk" class="com.haoliang.model.dto.EmailTemplateDTO">
+        <property name="title" value="服务器硬盘内存不足警告"/>
+        <property name="content">
+            <value>
+                <![CDATA[
+                <p>亲爱的运维人员：</p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;您好！</p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;您的运维管理的{{serverName}}部署机器的硬盘内存使用情况<span style="color: rgb(230, 0, 0);">{{info}}</span>,已超过设置的<span style="color: rgb(230, 0, 0);">{{rate}}</span>警戒线,</p><p>请及时增加硬盘存储或者清理硬盘存储,避免硬盘不足造成服务的不可用情况!</p><p>如有重大问题请联系合同比对管理员！</p><p><strong>合同比对系统监控提示！</strong></p>
+                ]]>
+            </value>
+        </property>
+        <property name="to" value="826853123@qq.com"/>
+    </bean>
+
+
+    <!-- 注册或登录邮箱验证 -->
+    <bean id="registerLogin" class="com.haoliang.model.dto.EmailTemplateDTO">
+        <property name="title" value="[TikTok Guild] Please verify your device"/>
+        <property name="content">
+            <value>
+                <![CDATA[
+                <p><span style="font-size: 14px;">Hey !</span></p><p><span style="font-size: 14px;">Verification code: {{code}}</span></p><p><span style="font-size: 14px;">Expires in {{time}} minutes</span></p><p><span style="font-size: 14px;">Please use it as soon as possible!</span></p>
+                ]]>
+            </value>
+        </property>
+    </bean>
+
+
+</beans>

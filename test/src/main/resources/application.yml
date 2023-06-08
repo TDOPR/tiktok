@@ -1,0 +1,94 @@
+server:
+  port: 9999
+
+spring:
+  redis:
+    enable: true
+    #redis服务器的ip
+    host: 127.0.0.1
+    port: 6379
+    jedis:
+      pool:
+        max-active: 8
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/easytrade?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=GMT%2b8&characterEncoding=utf8&connectTimeout=1000&socketTimeout=15000&autoReconnect=true&cachePrepStmts=true&useServerPrepStmts=true
+    username: root
+    password: 123456
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      # 连接池名称
+      pool-name: MyHikariCP
+      #最小空闲连接，默认值10，小于0或大于maximum-pool-size，都会重置为maximum-pool-size
+      minimum-idle: 10
+      #连接池最大连接数，默认是10 (cpu核数量 * 2 + 硬盘数量)
+      maximum-pool-size: 30
+      #空闲连接超时时间，默认值600000（10分钟），大于等于max-lifetime且max-lifetime>0，会被重置为0；不等于0且小于10秒，会被重置为10秒。
+      idle-timeout: 600000
+      #连接最大存活时间，不等于0且小于30秒，会被重置为默认值30分钟.设置应该比mysql设置的超时时间短
+      max-lifetime: 1800000
+      #连接超时时间：毫秒，小于250毫秒，否则被重置为默认值30秒
+      connection-timeout: 30000
+      #用于测试连接是否可用的查询语句
+      connection-test-query: SELECT 1
+
+  jackson:
+    serialization:
+      FAIL_ON_EMPTY_BEANS: false
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+    deserialization:
+      accept_empty_string_as_null_object: true
+
+jwt:
+  # 加密密钥
+  secret: iwqjhda8232bjgh432[cicada-smile]
+  # token有效时长(单位: 秒) 设置为一天
+  expire: 8640000000000000
+  #请求头参数
+  tokenName: token
+
+# mybatis-plus相关配置
+mybatis-plus:
+  # xml扫描，多个目录用逗号或者分号分隔（告诉 Mapper 所对应的 XML 文件位置）
+  mapper-locations: classpath:/mapper/*.xml
+  type-aliases-package: com.haoliang.model
+  # 以下配置均有默认值,可以不设置
+  global-config:
+    db-config:
+      #字段策略 IGNORED:"忽略判断"  NOT_NULL:"非 NULL 判断")  NOT_EMPTY:"非空判断"
+      field-strategy: NOT_EMPTY
+      #数据库类型
+      db-type: MYSQL
+  configuration:
+    # 是否开启自动驼峰命名规则映射:从数据库列名到Java属性驼峰命名的类似映射
+    map-underscore-to-camel-case: false
+    # 如果查询结果中包含空值的列，则 MyBatis 在映射的时候，不会映射这个字段
+    call-setters-on-nulls: true
+    # 这个配置会将执行的sql打印出来，在开发或测试的时候可以用
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+#########################  应用其它配置   ############################
+app:
+  #临时文件存储
+  rootPath: d:/data/tmp/
+  #是否加载redisson的RateLimit限流相关Bean   依赖reids
+  enableRateLimit: true
+  #限流模式  single=单实例限流,all=全局限流(分布式限流)
+  rateLimitModel: single
+  #是否加载表单去重提交验证  依赖reids
+  enableRepeatSubmit: true
+  #是否启动分布式锁  依赖reids
+  enableRedisLock: flase
+  #虚拟路径前缀
+  virtualPathPrefix: /userHeadImage
+  #虚拟路径URL
+  virtualPathURL: http://127.0.0.1:9090${app.virtualPathPrefix}/
+
+#########################  websocket配置 ##################################
+webSocket:
+  #监听websocket连接的端口
+  port: 9093
+  address: ws://192.168.2.128:${webSocket.port}
+  #此处要用电脑的ip,不然手机访问会出现问题
+  adminwsPath: /adminws

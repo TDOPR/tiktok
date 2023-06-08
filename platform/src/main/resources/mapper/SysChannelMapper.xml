@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoliang.mapper.SysChannelMapper">
+
+    <resultMap type="com.haoliang.model.SysChannel" id="channelTree">
+        <id column="id" property="id"/>
+        <result column="createTime" property="createTime"/>
+        <result column="lastmodifiedTime" property="lastmodifiedTime"/>
+        <result column="channelName" property="channelName"/>
+        <result column="channelCode" property="channelCode"/>
+        <result column="sortIndex" property="sortIndex"/>
+        <result column="parentId" property="parentId"/>
+        <collection property="children" ofType="com.haoliang.model.SysChannel" column="id" select="getChildren"/>
+    </resultMap>
+
+
+    <select id="findAllByParentIdIsNullOrderBySortIndex" resultMap="channelTree">
+        SELECT id,
+               createTime,
+               lastmodifiedTime,
+               channelName,
+               channelCode,
+               sortIndex,
+               parentId
+        FROM sys_channel
+        WHERE parentId = 0
+        ORDER BY sortIndex
+    </select>
+
+    <select id="getChildren" resultMap="channelTree">
+        SELECT id,
+               createTime,
+               lastmodifiedTime,
+               channelName,
+               channelCode,
+               sortIndex,
+               parentId
+        FROM sys_channel
+        WHERE parentId = #{parentId}
+        ORDER BY sortIndex
+    </select>
+
+
+</mapper>

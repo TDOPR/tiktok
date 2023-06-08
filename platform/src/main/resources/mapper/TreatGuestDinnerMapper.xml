@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoliang.mapper.TreatGuestDinnerMapper">
+
+    <select id="page" resultType="com.haoliang.model.vo.TreatGuestDinnerVO2">
+        select
+            t.id, t.createTime, masterUserId userId, email userName,itemUserIds,
+            videoUrl,imgUrl,address,coinType, auditTime,t.status
+        from
+            treat_guest_dinner t
+        left join
+            app_users u
+            on t.masterUserId = u.id
+        where
+            1=1
+        <if test="param.status!=null">
+            and t.status =#{param.status}
+        </if>
+        <if test="param.userId!=null">
+            and t.masterUserId =#{param.userId}
+        </if>
+        <if test="param.userId==null  and param.userName!=null and param.userName!=''">
+            and u.email like CONCAT('%',#{param.userName},'%')
+        </if>
+        <if test="param.beginDate!=null">
+            and t.createTime <![CDATA[ >= ]]> #{param.beginDate}
+        </if>
+        <if test="param.endDate!=null">
+            and t.createTime <![CDATA[ <= ]]> #{param.endDate}
+        </if>
+        order by
+            t.status
+    </select>
+
+</mapper>

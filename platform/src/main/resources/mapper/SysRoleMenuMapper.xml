@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoliang.mapper.SysRoleMenuMapper">
+
+    <select id="findAllByMenuIdIn" resultType="Integer">
+        select
+            distinct menuId
+        from
+            sys_role_menu
+        where
+            menuId = #{menuId}
+    </select>
+
+    <select id="findAllMenuIdByRoleId" resultType="Integer">
+        select
+            menuId
+        from
+            sys_role_menu
+        where
+            roleId = #{roleId}
+            and checked = #{checked}
+    </select>
+
+    <select id="findRoleNameByIdIn" resultType="java.lang.String">
+        select
+            roleName
+        from
+            sys_role
+        where
+            id in
+            <foreach collection="idList" item="id" separator="," open="(" close=")">
+                #{id}
+            </foreach>
+    </select>
+
+</mapper>

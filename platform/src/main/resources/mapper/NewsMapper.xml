@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoliang.mapper.NewsMapper">
+
+    <insert id="insertNewsByLanguage">
+        insert into
+            news_${news.language} (id, title, description, info, source)
+            value
+            (#{id}, #{news.title}, #{news.description}, #{news.info}, #{news.source});
+    </insert>
+
+    <insert id="insertBatchNoticeUser">
+        insert into
+            news_user(newsId, userId)
+        select
+            #{noticeId}, id
+        from
+            app_users
+    </insert>
+
+    <update id="updateNewsByLanguage">
+        update
+            news_${news.language}
+        set title=#{news.title},
+            description=#{news.description},
+            info= #{news.info},
+            source= #{news.source}
+        where
+            id = #{id}
+    </update>
+
+    <delete id="removeByLanguageAndIdIn">
+        delete from
+             news_${language}
+        where
+            id in
+            <foreach collection="idList" item="id" separator="," open="(" close=")">
+                #{id}
+            </foreach>
+    </delete>
+
+    <select id="clientPage" resultType="com.haoliang.model.News">
+        select
+            n.id, n.createTime, n.enabled, n.bannerUrl, tmp.*
+        from
+            news n
+        left join
+            news_${language} tmp
+            on n.id = tmp.id
+        where
+            type = 1
+            and enabled = 1
+    </select>
+
+    <select id="page" resultType="com.haoliang.model.News">
+        select
+            n.*, tmp.title
+        from
+            news n
+        left join
+            news_${language} tmp
+            on n.id = tmp.id
+        where
+            type=#{param.type}
+        <if test="param.enabled!=null">
+            and enabled= #{param.enabled}
+        </if>
+        <if test="param.beginDate!=null">
+            and createTime <![CDATA[ >= ]]> #{param.beginDate}
+        </if>
+        <if test="param.endDate!=null">
+            and createTime <![CDATA[ <= ]]> #{param.endDate}
+        </if>
+        <if test="param.title!=null and param.title!=''">
+            and tmp.title like CONCAT('%',#{param.title},'%')
+        </if>
+        <if test="param.info!=null and param.info!=''">
+            and tmp.info like CONCAT('%',#{param.info},'%')
+        </if>
+        order by
+            n.createTime desc
+    </select>
+
+    <select id="getInfoById" resultType="com.haoliang.model.vo.NewsInfoVO">
+        select
+            tmp.info
+        from
+            news n
+        left join
+            news_${language} tmp
+            on n.id = tmp.id
+        where
+            n.id = #{id}
+    </select>
+
+    <select id="randomLimit" resultType="com.haoliang.model.vo.NewsVO">
+        select
+            n.id, n.bannerUrl, n.createTime, tmp.*
+        from
+            news n
+        left join
+            news_${language} tmp
+            on n.id = tmp.id
+        where
+            n.id != #{id}
+            and type =1
+            and enabled=1
+        order by
+            RAND() LIMIT #{limitSize}
+    </select>
+
+    <select id="findMyNoticeList" resultType="com.haoliang.model.vo.SysNoticeVO">
+        select
+            n.id, n.createTime, tmp.title, tmp.description
+        from
+            news n
+        left join
+            news_${language} tmp
+            on n.id = tmp.id
+        left join
+            news_user nu
+            on n.id = nu.newsId
+        where
+            nu.userId = #{userId}
+            and n.enabled = 1
+            and n.type = 2
+        order by
+            n.createTime desc
+    </select>
+
+    <select id="getById" resultType="com.haoliang.model.dto.NewsDetailsDTO">
+        select
+            tmp.title, tmp.description, tmp.info, tmp.source
+        from
+            news n
+        left join
+            news_${language} tmp
+            on n.id = tmp.id
+        where
+            n.id = #{id}
+    </select>
+
+    <select id="selectForceNotice" resultType="com.haoliang.model.vo.HomeNoticeVO">
+        select
+            n.id,tmp.title, tmp.info, n.createTime
+        from
+            news n
+        left join
+            news_${language} tmp
+            on n.id = tmp.id
+        where
+            forceStatus=1
+        limit 1
+    </select>
+
+</mapper>

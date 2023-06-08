@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoliang.mapper.WalletTttLogsMapper">
+
+    <sql id="sumAmountByParent">
+        select
+            sum(amount)
+        from
+            wallet_ttt_logs w
+        left join
+            tree_paths t
+            on w.userId = t.descendant
+        where
+            t.ancestor = #{userId}
+            and t.level > 0
+    </sql>
+
+    <sql id="yesterday">
+        w.createTime between DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '%Y-%m-%d 00:00:00')
+        and DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '%Y-%m-%d 23:59:59')
+    </sql>
+
+    <select id="sumByTypeList" resultType="com.haoliang.model.WalletTttLogs">
+        select
+            type,sum(amount) amount
+        from
+            wallet_ttt_logs
+        where
+            userId=#{userId}
+            and type in
+            <foreach collection="typeList" item="type" separator="," open="(" close=")">
+                #{type}
+            </foreach>
+        group by
+            type
+    </select>
+
+    <select id="getDateSection" resultType="com.haoliang.model.dto.DateSection">
+        select
+            min(createTime) minDate, max(createTime) maxDate
+        from
+            wallet_ttt_logs
+        where
+            userId = #{userId}
+    </select>
+
+    <select id="sumTotalAmountByType" resultType="java.math.BigDecimal">
+        select
+            sum(amount)
+        from
+            wallet_ttt_logs
+        where
+            type = #{type}
+    </select>
+
+    <select id="sumProfitTotalAmountByTypeIn" resultType="java.math.BigDecimal">
+        select
+            sum(amount)
+        from
+            wallet_ttt_logs
+        where
+            type in
+            <foreach collection="typeList" item="type" separator="," open="(" close=")">
+                #{type}
+            </foreach>
+    </select>
+
+    <select id="getMinDate" resultType="java.time.LocalDate">
+        select
+            min(createTime)
+        from
+            wallet_ttt_logs
+    </select>
+
+    <select id="sumTotalAmountByTypeAndDateBetween" resultType="java.math.BigDecimal">
+        select
+            sum(amount)
+        from
+            wallet_ttt_logs
+        where
+            createTime BETWEEN #{begin} AND #{end}
+            and type = #{type}
+    </select>
+
+    <select id="sumTotalAmountByTypeInAndDateBetween" resultType="java.math.BigDecimal">
+        select
+            sum(amount)
+        from
+            wallet_ttt_logs
+        where
+            createTime BETWEEN #{begin} AND #{end}
+        and type in
+            <foreach collection="typeList" item="type" separator="," open="(" close=")">
+                #{type}
+            </foreach>
+
+    </select>
+
+    <select id="sumTotalAmountByUserIdAndTypeIn" resultType="java.math.BigDecimal">
+        select
+            sum(amount)
+        from
+            wallet_ttt_logs
+        where
+            userId=#{userId}
+            and type in
+            <foreach collection="typeList" item="type" separator="," open="(" close=")">
+                #{type}
+            </foreach>
+    </select>
+
+    <select id="pageByMerge" resultType="com.haoliang.model.WalletTttLogs">
+        select
+            sum(amount) amount,
+            action,
+            date_format(createTime, '%Y-%m-%d') createTime
+        from
+            wallet_ttt_logs
+        where
+            userId=#{userId}
+            and type in
+            <foreach collection="typeList" item="type" separator="," open="(" close=")">
+                #{type}
+            </foreach>
+        <if test="beginDate!=null">
+            and createTime <![CDATA[ >= ]]> #{beginDate}
+        </if>
+        <if test="endDate!=null">
+            and createTime <![CDATA[ <= ]]> #{endDate}
+        </if>
+        group by
+            createTime,action
+        order by
+            createTime desc
+    </select>
+
+    <select id="pageByAllType" resultType="com.haoliang.model.WalletTttLogs">
+        select
+            tmp.*
+        from (
+            select
+                sum(amount) amount, action,date_format(createTime, '%Y-%m-%d') createTime,0 type
+            from
+                wallet_ttt_logs
+            where
+                userId=#{userId}
+                and type in (1,2,3,4)
+            <if test="beginDate!=null">
+                and createTime <![CDATA[ >= ]]> #{beginDate}
+            </if>
+            <if test="endDate!=null">
+                and createTime <![CDATA[ <= ]]> #{endDate}
+            </if>
+            group by
+                createTime,action
+            union all
+            select
+                sum(amount),action,date_format(createTime, '%Y-%m-%d') createTime,1 type
+            from
+                wallet_ttt_logs
+            where
+                userId=#{userId}
+                and type in (5,6,7)
+            <if test="beginDate!=null">
+                and createTime <![CDATA[ >= ]]> #{beginDate}
+            </if>
+            <if test="endDate!=null">
+                and createTime <![CDATA[ <= ]]> #{endDate}
+            </if>
+            group by
+                createTime,action
+            union all
+            select
+                amount,action,createTime,type
+            from
+                wallet_ttt_logs
+            where
+                userId=#{userId}
+                and type>=8
+            <if test="beginDate!=null">
+                AND createTime <![CDATA[ >= ]]> #{beginDate}
+            </if>
+            <if test="endDate!=null">
+                AND createTime <![CDATA[ <= ]]> #{endDate}
+            </if>
+        ) tmp
+        order by
+            createTime desc
+    </select>
+
+    <select id="sumAmountByAndUserIdAndTypeInAndDateRange" resultType="java.math.BigDecimal">
+        select
+            sum(amount)
+        from
+            wallet_ttt_logs
+        where
+            userId=#{userId}
+            and type in
+            <foreach collection="typeList" item="type" separator="," open="(" close=")">
+                #{type}
+            </foreach>
+        <if test="beginDate!=null">
+            and createTime <![CDATA[ >= ]]> #{beginDate}
+        </if>
+        <if test="endDate!=null">
+            and createTime <![CDATA[ <= ]]> #{endDate}
+        </if>
+    </select>
+
+    <select id="getSumTaskEarningsByTypeIn" resultType="java.math.BigDecimal">
+        select
+            sum(amount) from wallet_ttt_logs w
+        left join
+            app_users u
+            on w.userId=u.id
+        where
+            u.valid=1
+            and w.zero=0
+            and w.type in
+            <foreach collection="typeList" item="type" separator="," open="(" close=")">
+                #{type}
+            </foreach>
+            and  <include refid="yesterday"></include>
+    </select>
+
+    <select id="sumByType" resultType="com.haoliang.model.WalletTttLogs">
+        select
+            type,sum(amount) amount
+        from
+            wallet_ttt_logs
+        where
+            userId = #{userId}
+        group by
+            type
+    </select>
+
+    <select id="sumYesterdayByType" resultType="com.haoliang.model.WalletTttLogs">
+        select
+            type,sum(amount) amount
+        from
+            wallet_ttt_logs w
+        where
+            userId = #{userId}
+            and <include refid="yesterday"></include>
+        group by
+            type
+    </select>
+
+    <select id="getSumTaskEarningGroupByUser" resultType="com.haoliang.model.dto.TeamTaskDTO">
+        select
+            sum(amount)amount,userId,level
+        from
+            wallet_ttt_logs w
+        left join
+            app_users u
+            on w.userId=u.id
+        where
+            u.valid=1 and u.enabled=1
+            and w.zero=0
+            and <include refid="yesterday"></include>
+            and type in
+            <foreach collection="typeList" item="type" separator="," open="(" close=")">
+                #{type}
+            </foreach>
+            group by
+                userId
+            having
+                amount>0
+    </select>
+
+    <select id="pageByMergeAndGroupByType" resultType="com.haoliang.model.WalletTttLogs">
+        select
+            sum(amount) amount, date_format(createTime, '%Y-%m-%d') createTime,type
+        from
+            wallet_ttt_logs
+        where
+            userId=#{userId}
+            and type in
+            <foreach collection="typeList" item="type" separator="," open="(" close=")">
+                #{type}
+            </foreach>
+        group by
+            createTime,type
+        order by
+            createTime desc
+    </select>
+
+    <select id="sumTotalAmountByTypeList" resultType="java.math.BigDecimal">
+        select
+            sum(amount) from wallet_ttt_logs
+        where
+            type in
+            <foreach collection="typeList" item="type" separator="," open="(" close=")">
+                #{type}
+            </foreach>
+    </select>
+
+    <select id="sumYesterdayTotalAmountByTypeList" resultType="java.math.BigDecimal">
+        select
+            sum(amount)
+        from
+            wallet_ttt_logs w
+        where
+            <include refid="yesterday"></include>
+            and type in
+            <foreach collection="typeList" item="type" separator="," open="(" close=")">
+                #{type}
+            </foreach>
+    </select>
+
+    <select id="sumYesterdayTotalZeroAmount" resultType="java.math.BigDecimal">
+        select
+            sum(amount)
+        from
+            wallet_ttt_logs w
+        where
+            zero = 1
+            and <include refid="yesterday"></include>
+    </select>
+
+    <select id="sumYesterdayTotalZeroAmountAndParentId" resultType="java.math.BigDecimal">
+        <include refid="sumAmountByParent"></include>
+            and zero = 1
+            and  <include refid="yesterday"></include>
+    </select>
+
+    <select id="sumTotalAmountByTypeListAndParentId" resultType="java.math.BigDecimal">
+        <include refid="sumAmountByParent"></include>
+            and type in
+            <foreach collection="typeList" item="type" separator="," open="(" close=")">
+                #{type}
+            </foreach>
+    </select>
+
+    <select id="sumYesterdayTotalAmountByTypeListAndParentId" resultType="java.math.BigDecimal">
+        <include refid="sumAmountByParent"></include>
+            and <include refid="yesterday"></include>
+            and type in
+            <foreach collection="typeList" item="type" separator="," open="(" close=")">
+                #{type}
+            </foreach>
+    </select>
+
+</mapper>

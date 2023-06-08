@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoliang.mapper.WalletsUsdWithdrawMapper">
+
+    <select id="page" resultType="com.haoliang.model.vo.WalletsUsdWithdrawVO"
+            parameterType="com.haoliang.model.condition.WalletsUsdWithdrawCondition">
+        select
+            w.id,w.txid,w.userId,u.nickName,w.coinId,w.coinType,w.amount,
+            w.createTime,w.auditTime,w.status
+        from
+            wallets_usd_withdraw w
+        left join
+            app_users u
+            on w.userId=u.id
+        where
+            1=1
+        <if test="param.userId!=null">
+            and u.id= #{param.userId}
+        </if>
+        <if test="param.status!=null ">
+            and status= #{param.status}
+        </if>
+        <if test="param.channelType!=null ">
+            and coinId= #{param.channelType}
+        </if>
+        <if test="param.beginDate!=null">
+            and w.createTime <![CDATA[ >= ]]> #{param.beginDate}
+        </if>
+        <if test="param.endDate!=null">
+            and w.createTime <![CDATA[ <= ]]> #{param.endDate}
+        </if>
+        order by
+            status,
+            w.createTime desc
+    </select>
+
+</mapper>

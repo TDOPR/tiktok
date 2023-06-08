@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.haoliang</groupId>
+    <artifactId>tiktok</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0.0</version>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.5.6</version>
+    </parent>
+
+    <name>tiktok</name>
+    <url></url>
+
+    <modules>
+        <!--系统服务-->
+        <module>platform</module>
+        <module>business</module>
+        <module>common</module>
+        <module>sms</module>
+        <module>test</module>
+    </modules>
+
+    <properties>
+        <springboot.version>2.5.6</springboot.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+        <lombok.version>1.18.24</lombok.version>
+        <mysql.version>8.0.30</mysql.version>
+        <commons-lang3.version>3.7</commons-lang3.version>
+        <fastjson.version>1.2.83</fastjson.version>
+        <dom4j.version>1.6.1</dom4j.version>
+        <commons-io.version>2.5</commons-io.version>
+        <commons-httpclient.version>3.1</commons-httpclient.version>
+        <jwt.version>0.9.1</jwt.version>
+        <logback.version>1.2.9</logback.version>
+        <okhttp.version>3.12.0</okhttp.version>
+        <guava.version>31.1-jre</guava.version>
+        <spring-boot-admin.version>2.5.6</spring-boot-admin.version>
+        <redisson.version>3.17.6</redisson.version>
+        <hutool.version>5.8.9</hutool.version>
+        <easyexcel.version>3.1.1</easyexcel.version>
+        <mybatis-plus.version>3.5.2</mybatis-plus.version>
+        <aspectjweaver.version>1.9.4</aspectjweaver.version>
+        <p6spy.version>1.0</p6spy.version>
+        <druid-boot.version>1.2.14</druid-boot.version>
+        <jsr310.version>2.13.0</jsr310.version>
+        <google-zxing.version>3.4.1</google-zxing.version>
+        <oshi.version>6.3.0</oshi.version>
+        <netty-all.version>4.1.36.Final</netty-all.version>
+        <httpclient.version>4.5.2</httpclient.version>
+        <emoji-java.version>5.1.1</emoji-java.version>
+        <aliyun.version>4.6.3</aliyun.version>
+        <jsoup.version>1.15.4</jsoup.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>dom4j</groupId>
+                <artifactId>dom4j</artifactId>
+                <version>${dom4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-httpclient</groupId>
+                <artifactId>commons-httpclient</artifactId>
+                <version>${commons-httpclient.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt</artifactId>
+                <version>${jwt.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+
+            <!--redis操作-->
+            <dependency>
+                <groupId>de.codecentric</groupId>
+                <artifactId>spring-boot-admin-starter-server</artifactId>
+                <version>${spring-boot-admin.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>de.codecentric</groupId>
+                <artifactId>spring-boot-admin-starter-client</artifactId>
+                <version>${spring-boot-admin.version}</version>
+            </dependency>
+
+            <!--redisson 分布式防表单提交用到的,单节点部署可以使用ecache基于内存的缓存-->
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson-spring-boot-starter</artifactId>
+                <version>${redisson.version}</version>
+            </dependency>
+
+            <!--工具包-->
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-bom</artifactId>
+                <version>${hutool.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!--excel增强-->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>easyexcel</artifactId>
+                <version>${easyexcel.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+
+            <!--aop切面-->
+            <dependency>
+                <groupId>org.aspectj</groupId>
+                <artifactId>aspectjweaver</artifactId>
+                <version>${aspectjweaver.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>${druid-boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.haoliang.tiktok</groupId>
+                <artifactId>common</artifactId>
+                <version>${version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.haoliang.tiktok</groupId>
+                <artifactId>business</artifactId>
+                <version>${version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.haoliang.tiktok</groupId>
+                <artifactId>sms</artifactId>
+                <version>${version}</version>
+            </dependency>
+
+            <!-- jdk8 LocalDateTime兼容 -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-jsr310</artifactId>
+                <version>${jsr310.version}</version>
+            </dependency>
+
+            <!-- 谷歌认证器二维码生成 -->
+            <dependency>
+                <groupId>com.google.zxing</groupId>
+                <artifactId>core</artifactId>
+                <version>${google-zxing.version}</version>
+            </dependency>
+
+            <!-- 获取系统信息 -->
+            <dependency>
+                <groupId>com.github.oshi</groupId>
+                <artifactId>oshi-core</artifactId>
+                <version>${oshi.version}</version>
+            </dependency>
+
+            <!--netty核心组件-->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>${netty-all.version}</version>
+            </dependency>
+
+            <!--根据url下载文件使用到了-->
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.vdurmont</groupId>
+                <artifactId>emoji-java</artifactId>
+                <version>${emoji-java.version}</version>
+            </dependency>
+
+            <!-- https://mvnrepository.com/artifact/com.aliyun/aliyun-java-sdk-core -->
+            <dependency>
+                <groupId>com.aliyun</groupId>
+                <artifactId>aliyun-java-sdk-core</artifactId>
+                <version>${aliyun.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>${jsoup.version}</version>
+            </dependency>
+
+            <!-- http工具类 -->
+            <dependency>
+                <groupId>com.squareup.okio</groupId>
+                <artifactId>okio</artifactId>
+                <version>1.13.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>3.12.0</version>
+            </dependency>
+
+        </dependencies>
+
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.9.0</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>public</id>
+            <name>aliyun nexus</name>
+            <url>https://maven.aliyun.com/repository/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>public</id>
+            <name>aliyun nexus</name>
+            <url>https://maven.aliyun.com/repository/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
+</project>

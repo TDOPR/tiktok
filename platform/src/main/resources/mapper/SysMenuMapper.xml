@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoliang.mapper.SysMenuMapper">
+
+    <resultMap type="com.haoliang.model.SysMenu" id="menuTree">
+        <id column="id" property="id"/>
+        <result column="createTime" property="createTime"/>
+        <result column="lastmodifiedTime" property="lastmodifiedTime"/>
+        <result column="path" property="path"/>
+        <result column="title" property="title"/>
+        <result column="icon" property="icon"/>
+        <result column="parentId" property="parentId"/>
+        <result column="sortIndex" property="sortIndex"/>
+        <result column="importStr" property="importStr"/>
+        <result column="outlink" property="outlink"/>
+        <result column="type" property="type"/>
+        <result column="display" property="display"/>
+        <result column="authorityStr" property="authorityStr"/>
+        <collection property="children" ofType="com.haoliang.model.SysMenu" column="id" select="getMenuChildren"/>
+    </resultMap>
+
+    <resultMap type="com.haoliang.model.vo.MenuVO" id="menuTreeByRoleId">
+        <result column="id" property="id"/>
+        <result column="path" property="path"/>
+        <result column="title" property="title"/>
+        <result column="icon" property="icon"/>
+        <result column="importStr" property="importStr"/>
+        <collection property="children" ofType="com.haoliang.model.vo.MenuVO" column="{id= id,roleId= roleId}"
+                    select="getMenuChildrenByRoleId"/>
+    </resultMap>
+
+    <resultMap type="com.haoliang.model.vo.MenuVO" id="menuTreeByAdminRole">
+        <result column="id" property="id"/>
+        <result column="path" property="path"/>
+        <result column="title" property="title"/>
+        <result column="icon" property="icon"/>
+        <result column="importStr" property="importStr"/>
+        <collection property="children" ofType="com.haoliang.model.vo.MenuVO" column="id"
+                    select="getMenuChildrenByParentId"/>
+    </resultMap>
+
+    <resultMap type="com.haoliang.model.dto.MenuIdDTO" id="menuIdTree">
+        <result column="id" property="id"/>
+        <collection property="children" ofType="com.haoliang.model.dto.MenuIdDTO" column="id"
+                    select="findIdByParentId"/>
+    </resultMap>
+
+    <resultMap type="com.haoliang.model.vo.MenuTreeVO" id="MenuTreeVO">
+        <result column="id" property="id"/>
+        <result column="title" property="title"/>
+        <collection property="children" ofType="com.haoliang.model.vo.MenuTreeVO" column="id"
+                    select="MenuTreeVOByParentId"/>
+    </resultMap>
+
+    <select id="findAllByParentIdOrderBySortIndexAsc" resultMap="menuTree">
+        select
+            *
+        from
+            sys_menu
+        where
+            parentId = 0
+        order by
+            sortIndex
+    </select>
+
+    <select id="getMenuChildren" resultMap="menuTree">
+        select
+            *
+        from
+            sys_menu
+        where
+            parentId = #{id}
+        order by
+            sortIndex
+    </select>
+
+
+    <select id="findMenuNameById" resultType="java.lang.String">
+        select
+            title
+        from
+            sys_menu
+        where
+            id = #{id}
+    </select>
+
+    <select id="findMaxSortIndex" resultType="java.lang.Integer">
+        select
+            max(sortIndex)
+        from
+            sys_menu
+    </select>
+
+    <select id="findAllAuthorityByRoleId" resultType="java.lang.String">
+        select
+            sm.authorityStr
+        from
+            sys_menu sm
+        left join
+            sys_role_menu srm
+            on sm.id = srm.menuId
+        where
+            srm.roleId = #{roleId}
+            and sm.type > 1
+            and sm.display = 1
+            and sm.authorityStr != ''
+    </select>
+
+    <select id="findAllAuthority" resultType="java.lang.String">
+        select
+            authorityStr
+        from
+            sys_menu
+        where
+            type > 1
+            and display = 1
+            and authorityStr != ''
+    </select>
+
+    <!-- 根据角色Id查询菜单  -->
+    <select id="findAllByParentIdAndRoleIdOrderBySortIndexAsc" resultMap="menuTreeByRoleId">
+        select
+            sm.id,sm.path,sm.outlink,sm.type,sm.title,sm.icon,sm.importStr,srm.roleId
+        from
+            sys_menu sm
+        left join
+            sys_role_menu srm
+            on sm.id = srm.menuId
+        where
+            parentId = 0
+            and sm.display = 1
+            and srm.roleId = #{roleId}
+        order by
+            sortIndex
+    </select>
+
+    <select id="getMenuChildrenByRoleId" resultMap="menuTreeByRoleId">
+        select
+            sm.id, sm.path,sm.outlink,sm.type,sm.title,sm.icon,
+            sm.sortIndex,sm.importStr, srm.roleId
+        from
+            sys_menu sm
+        left join
+            sys_role_menu srm
+            on sm.id = srm.menuId
+        where
+            parentId = #{id}
+            and sm.display = 1
+            and type!=3
+            and srm.roleId=#{roleId}
+        order by
+            sortIndex
+    </select>
+
+    <!-- 管理员角色 查询所有的菜单  -->
+    <select id="findAllByParentIOrderBySortIndexAsc" resultMap="menuTreeByAdminRole">
+        select
+            sm.id,sm.path,sm.outlink,sm.type,sm.title,sm.icon,sm.importStr
+        from
+            sys_menu sm
+        where
+            parentId = 0
+            and sm.display = 1
+        order by
+            sortIndex
+    </select>
+
+    <select id="getMenuChildrenByParentId" resultMap="menuTreeByAdminRole">
+        select
+            sm.id,sm.path,sm.outlink,sm.type, sm.title,sm.icon,sm.sortIndex,sm.importStr
+        from
+            sys_menu sm
+        where
+            parentId = #{id}
+            and sm.display = 1
+            and type!=3
+        order by
+            sortIndex
+    </select>
+
+    <select id="findIdByParentId" resultMap="menuIdTree">
+        select
+            id
+        from
+            sys_menu
+        where
+            parentId = #{parentId}
+    </select>
+
+    <!--获取添加角色需要的菜单数据 -->
+    <select id="getTree" resultMap="MenuTreeVO">
+        select
+            id, title
+        from
+            sys_menu
+        where
+            parentId = 0
+            and
+            display = 1
+        order by
+            sortIndex
+    </select>
+
+    <select id="MenuTreeVOByParentId" resultMap="MenuTreeVO">
+        select
+            id,title
+        from
+            sys_menu
+        where
+            parentId = #{id}
+            and display = 1
+        order by
+            sortIndex
+    </select>
+
+</mapper>
